@@ -1,13 +1,1 @@
-[80 rows x 6 columns]
-/Users/primus.vekuh@sentinelone.com/Documents/reports/save_formatted_version.py:51: FutureWarning: 'M' is deprecated and will be removed in a future version, please use 'ME' instead.
-  df.set_index('instance_create_time').resample('M').size().plot(color='coral')
-Traceback (most recent call last):
-  File "/Users/primus.vekuh@sentinelone.com/Documents/reports/save_formatted_version.py", line 51, in <module>
-    df.set_index('instance_create_time').resample('M').size().plot(color='coral')
-  File "/Users/primus.vekuh@sentinelone.com/Library/Python/3.9/lib/python/site-packages/pandas/core/generic.py", line 9771, in resample
-    return get_resampler(
-  File "/Users/primus.vekuh@sentinelone.com/Library/Python/3.9/lib/python/site-packages/pandas/core/resample.py", line 2050, in get_resampler
-    return tg._get_resampler(obj, kind=kind)
-  File "/Users/primus.vekuh@sentinelone.com/Library/Python/3.9/lib/python/site-packages/pandas/core/resample.py", line 2272, in _get_resampler
-    raise TypeError(
-TypeError: Only valid with DatetimeIndex, TimedeltaIndex or PeriodIndex, but got an instance of 'Index'
+{"app":"agent-files-gateway","group":"bd","owner":"bd-infra","k8s_app":"agent-files-gateway","environment":"prod","scalyr-team":"cws-metrics","helm.sh/chart":"agent-files-gateway","customer-facing":"false","service-repository":"telemetry","app.kubernetes.io/name":"agent-files-gateway","app.kubernetes.io/feature":"agent-files-gateway","app.kubernetes.io/part-of":"agent-files-gateway","app.kubernetes.io/version":"1.0.0","app.kubernetes.io/instance":"agent-files-gateway","app.kubernetes.io/component":"agent-files-gateway","app.kubernetes.io/managed-by":"Helm","app.kubernetes.io/app-instance":"agent-files-gateway","app.kubernetes.io/product-line":"epp"}
