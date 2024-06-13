@@ -1,0 +1,90 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+import json
+
+# Read CSV file into DataFrame
+csv_file = 'k8s_deployments_exported_06_03_2024.csv'
+df = pd.read_csv(csv_file)
+
+# Convert 'creation_timestamp' to datetime
+df['creation_timestamp'] = pd.to_datetime(df['creation_timestamp'], errors='coerce')
+
+# Format 'creation_timestamp' to 'YYYY-MM-DD HH:MM:SS'
+df['creation_timestamp'] = df['creation_timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+
+# Display basic information about the DataFrame
+print(df.info())
+
+# Save formatted DataFrame as an image
+def save_dataframe_as_image(df, path):
+    fig, ax = plt.subplots(figsize=(20, 10))  # Set the size frame
+    ax.axis('tight')
+    ax.axis('off')
+    the_table = plt.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center', colColours=["lightgrey"]*len(df.columns))
+    the_table.auto_set_font_size(False)
+    the_table.set_fontsize(10)
+    the_table.scale(1.2, 1.2)  # Adjust scaling as needed
+    plt.savefig(path, bbox_inches='tight', dpi=300)
+    plt.close(fig)
+
+# Save the summary DataFrame as an image
+save_dataframe_as_image(df, 'summary_k8s_deployments.png')
+
+# Extract relevant information from 'labels' column
+labels_df = df['labels'].apply(json.loads).apply(pd.Series)
+labels_df['owner'] = labels_df.get('owner', 'unknown')
+labels_df['group'] = labels_df.get('group', 'unknown')
+labels_df['environment'] = labels_df.get('environment', 'unknown')
+labels_df['image_name'] = df['spec images'].apply(lambda x: x.strip('[]').split('/')[-1].split(':')[0])
+
+# Merge extracted labels with original DataFrame
+df = df.join(labels_df[['owner', 'group', 'environment', 'image_name']])
+
+# Plot 1: Count of Deployments by Namespace
+plt.figure(figsize=(10, 6))
+df['namespace'].value_counts().plot(kind='bar', color='skyblue')
+plt.title('Count of Deployments by Namespace')
+plt.xlabel('Namespace')
+plt.ylabel('Count')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig('deployments_by_namespace.png', bbox_inches='tight')
+plt.show()
+
+# Plot 2: Count of Deployments by Owner
+plt.figure(figsize=(10, 6))
+df['owner'].value_counts().plot(kind='bar', color='lightgreen')
+plt.title('Count of Deployments by Owner')
+plt.xlabel('Owner')
+plt.ylabel('Count')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig('deployments_by_owner.png', bbox_inches='tight')
+plt.show()
+
+# Plot 3: Count of Images by Environment
+plt.figure(figsize=(10, 6))
+df['environment'].value_counts().plot(kind='bar', color='coral')
+plt.title('Count of Images by Environment')
+plt.xlabel('Environment')
+plt.ylabel('Count')
+plt.xticks(rotation=45)
+plt.tight_layout()
+plt.savefig('images_by_environment.png', bbox_inches='tight')
+plt.show()
+
+# Analysis: Max Age in Days
+df['creation_timestamp'] = pd.to_datetime(df['creation_timestamp'], format='%Y-%m-%d %H:%M:%S')
+df['age_in_days'] = (pd.to_datetime('today') - df['creation_timestamp']).dt.days
+
+max_age_df = df.groupby(['owner', 'namespace', 'image_name'])['age_in_days'].max().reset_index()
+
+# Save max age analysis DataFrame as an image
+save_dataframe_as_image(max_age_df, 'max_age_analysis.png')
+
+# Save detailed analysis as a CSV file
+detailed_analysis = df.groupby(['namespace', 'owner', 'group', 'environment', 'image_name']).size().reset_index(name='count')
+detailed_analysis.to_csv('detailed_analysis.csv', index=False)
+
+# Display the final DataFrame
+print(df.to_string(index=False))
