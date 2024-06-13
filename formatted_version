@@ -47,6 +47,7 @@ plt.tight_layout()
 plt.show()
 
 # Plot 3: Instances creation over time
+df['instance_create_time'] = pd.to_datetime(df['instance_create_time'], errors='coerce')  # Ensure it's datetime for resampling
 plt.figure(figsize=(10, 6))
 df.set_index('instance_create_time').resample('M').size().plot(color='coral')
 plt.title('Instances Creation Over Time')
