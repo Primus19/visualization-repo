@@ -1,5 +1,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
+import matplotlib.backends.backend_pdf
+from pandas.plotting import table
 from matplotlib.dates import DateFormatter
 
 # Read CSV file into DataFrame
@@ -65,6 +67,21 @@ df['db_instance_class'].value_counts().plot(kind='bar', color='skyblue').figure.
 df['engine'].value_counts().plot(kind='bar', color='lightgreen').figure.savefig('instances_by_engine.png')
 df.set_index('instance_create_time').resample('M').size().plot(color='coral').figure.savefig('instances_over_time.png')
 df['engine_version'].value_counts().plot(kind='bar', color='orange').figure.savefig('engine_versions.png')
+
+# Save the DataFrame as a PNG file
+def save_dataframe_as_image(df, path):
+    fig, ax = plt.subplots(figsize=(12, 6))  # Set the size frame
+    ax.axis('tight')
+    ax.axis('off')
+    the_table = table(ax, df, loc='center', cellLoc='center', colColours=["lightgray"] * len(df.columns))
+    the_table.auto_set_font_size(False)
+    the_table.set_fontsize(10)
+    the_table.scale(1.2, 1.2)  # Adjust scaling as needed
+    plt.savefig(path, bbox_inches='tight', dpi=300)
+    plt.close(fig)
+
+# Save the summary DataFrame as an image
+save_dataframe_as_image(df_summary, 'summary_dataframe.png')
 
 # Display DataFrame in a nice table format using pandas options
 pd.set_option('display.max_columns', None)
