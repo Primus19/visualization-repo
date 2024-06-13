@@ -1,6 +1,5 @@
 import pandas as pd
 import matplotlib.pyplot as plt
-import matplotlib.backends.backend_pdf
 from pandas.plotting import table
 from matplotlib.dates import DateFormatter
 
@@ -10,6 +9,12 @@ df = pd.read_csv(csv_file)
 
 # Convert 'instance_create_time' to datetime
 df['instance_create_time'] = pd.to_datetime(df['instance_create_time'], errors='coerce')
+
+# Replace NaN with "empty"
+df.fillna("empty", inplace=True)
+
+# Format the 'instance_create_time' to 'YYYY-MM-DD HH:MM:SS'
+df['instance_create_time'] = df['instance_create_time'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
 # Display basic information about the DataFrame
 print(df.info())
