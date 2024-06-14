@@ -12,6 +12,9 @@ df['creation_timestamp'] = pd.to_datetime(df['creation_timestamp'], errors='coer
 # Format 'creation_timestamp' to 'YYYY-MM-DD HH:MM:SS'
 df['creation_timestamp'] = df['creation_timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
 
+# Replace NaN with "empty"
+df.fillna("empty", inplace=True)
+
 # Display basic information about the DataFrame
 print(df.info())
 
@@ -20,7 +23,7 @@ labels_df = df['labels'].apply(json.loads).apply(pd.Series)
 labels_df['owner'] = labels_df.get('owner', 'unknown')
 labels_df['group'] = labels_df.get('group', 'unknown')
 labels_df['environment'] = labels_df.get('environment', 'unknown')
-labels_df['image_name'] = df['spec images'].apply(lambda x: x.strip('[]').split('/')[-1].split(':')[0])
+labels_df['image_name'] = df['spec_images'].apply(lambda x: x.strip('[]').split('/')[-1].split(':')[0])
 
 # Merge extracted labels with original DataFrame
 df = df.join(labels_df[['owner', 'group', 'environment', 'image_name']])
@@ -62,14 +65,27 @@ plt.show()
 df['creation_timestamp'] = pd.to_datetime(df['creation_timestamp'], format='%Y-%m-%d %H:%M:%S')
 df['age_in_days'] = (pd.to_datetime('today') - df['creation_timestamp']).dt.days
 
+# Group by owner, namespace, and image_name
 max_age_df = df.groupby(['owner', 'namespace', 'image_name'])['age_in_days'].max().reset_index()
+
+# Add a column to indicate whether to replace or maintain
+max_age_df['action'] = max_age_df['age_in_days'].apply(lambda x: 'replace' if x > 90 else 'maintain')
 
 # Save max age analysis DataFrame as a CSV file
 max_age_df.to_csv('max_age_analysis.csv', index=False)
 
-# Save detailed analysis as a CSV file
+# Detailed analysis grouped by namespace, owner, group, environment, and image_name
 detailed_analysis = df.groupby(['namespace', 'owner', 'group', 'environment', 'image_name']).size().reset_index(name='count')
 detailed_analysis.to_csv('detailed_analysis.csv', index=False)
+
+# Additional grouping analysis
+# Group by namespace and owner
+namespace_owner_group = df.groupby(['namespace', 'owner']).size().reset_index(name='count')
+namespace_owner_group.to_csv('namespace_owner_analysis.csv', index=False)
+
+# Group by environment and image_name
+environment_image_group = df.groupby(['environment', 'image_name']).size().reset_index(name='count')
+environment_image_group.to_csv('environment_image_analysis.csv', index=False)
 
 # Save summary DataFrame as a CSV file
 df.to_csv('summary_k8s_deployments.csv', index=False)
