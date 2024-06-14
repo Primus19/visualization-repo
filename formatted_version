@@ -39,6 +39,7 @@ instances_by_engine.columns = ['engine', 'count']
 instances_by_engine.to_csv('instances_by_engine.csv', index=False)
 
 # Analysis: Instances creation over time
+df['instance_create_time'] = pd.to_datetime(df['instance_create_time'], errors='coerce')  # Ensure it's datetime for resampling
 instances_over_time = df.set_index('instance_create_time').resample('M').size().reset_index()
 instances_over_time.columns = ['instance_create_time', 'count']
 instances_over_time.to_csv('instances_over_time.csv', index=False)
