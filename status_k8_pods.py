@@ -63,9 +63,9 @@ containers_by_state.to_csv('containers_by_state.csv', index=False)
 containers_age = df[['container_name', 'pod_name', 'namespace', 'cluster_name', 'age_in_days']].sort_values(by='age_in_days', ascending=False)
 containers_age.to_csv('containers_age_analysis.csv', index=False)
 
-# Analysis 5: Reason and Messages Summary
-reason_message_summary = df[['container_name', 'pod_name', 'namespace', 'cluster_name', 'reason', 'message']]
-reason_message_summary.to_csv('reason_message_summary.csv', index=False)
+# Analysis 5: Containers by Name, State, State Message, Image Name, and Version
+containers_detail = df[['container_name', 'container_state', 'reason', 'message', 'image_name', 'image_version']]
+containers_detail.to_csv('containers_detail_analysis.csv', index=False)
 
 # Display DataFrames in nicely formatted tables using pandas options
 pd.set_option('display.max_columns', None)
@@ -90,5 +90,5 @@ print(containers_by_state.to_string(index=False))
 print("\nContainers Age Analysis:")
 print(containers_age.to_string(index=False))
 
-print("\nReason and Messages Summary:")
-print(reason_message_summary.to_string(index=False))
+print("\nContainers Detail Analysis:")
+print(containers_detail.to_string(index=False))
