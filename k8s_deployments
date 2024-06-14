@@ -15,21 +15,6 @@ df['creation_timestamp'] = df['creation_timestamp'].dt.strftime('%Y-%m-%d %H:%M:
 # Display basic information about the DataFrame
 print(df.info())
 
-# Save formatted DataFrame as an image
-def save_dataframe_as_image(df, path):
-    fig, ax = plt.subplots(figsize=(20, 10))  # Set the size frame
-    ax.axis('tight')
-    ax.axis('off')
-    the_table = plt.table(cellText=df.values, colLabels=df.columns, loc='center', cellLoc='center', colColours=["lightgrey"]*len(df.columns))
-    the_table.auto_set_font_size(False)
-    the_table.set_fontsize(10)
-    the_table.scale(1.2, 1.2)  # Adjust scaling as needed
-    plt.savefig(path, bbox_inches='tight', dpi=300)
-    plt.close(fig)
-
-# Save the summary DataFrame as an image
-save_dataframe_as_image(df, 'summary_k8s_deployments.png')
-
 # Extract relevant information from 'labels' column
 labels_df = df['labels'].apply(json.loads).apply(pd.Series)
 labels_df['owner'] = labels_df.get('owner', 'unknown')
@@ -79,12 +64,15 @@ df['age_in_days'] = (pd.to_datetime('today') - df['creation_timestamp']).dt.days
 
 max_age_df = df.groupby(['owner', 'namespace', 'image_name'])['age_in_days'].max().reset_index()
 
-# Save max age analysis DataFrame as an image
-save_dataframe_as_image(max_age_df, 'max_age_analysis.png')
+# Save max age analysis DataFrame as a CSV file
+max_age_df.to_csv('max_age_analysis.csv', index=False)
 
 # Save detailed analysis as a CSV file
 detailed_analysis = df.groupby(['namespace', 'owner', 'group', 'environment', 'image_name']).size().reset_index(name='count')
 detailed_analysis.to_csv('detailed_analysis.csv', index=False)
+
+# Save summary DataFrame as a CSV file
+df.to_csv('summary_k8s_deployments.csv', index=False)
 
 # Display the final DataFrame
 print(df.to_string(index=False))
