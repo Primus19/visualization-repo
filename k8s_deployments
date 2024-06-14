@@ -24,9 +24,10 @@ labels_df['owner'] = labels_df.get('owner', 'unknown')
 labels_df['group'] = labels_df.get('group', 'unknown')
 labels_df['environment'] = labels_df.get('environment', 'unknown')
 labels_df['image_name'] = df['spec_images'].apply(lambda x: x.strip('[]').split('/')[-1].split(':')[0])
+labels_df['image_version'] = df['spec_images'].apply(lambda x: x.strip('[]').split(':')[-1])
 
 # Merge extracted labels with original DataFrame
-df = df.join(labels_df[['owner', 'group', 'environment', 'image_name']])
+df = df.join(labels_df[['owner', 'group', 'environment', 'image_name', 'image_version']])
 
 # Plot 1: Count of Deployments by Namespace
 plt.figure(figsize=(10, 6))
@@ -83,8 +84,8 @@ detailed_analysis.to_csv('detailed_analysis.csv', index=False)
 namespace_owner_group = df.groupby(['namespace', 'owner']).size().reset_index(name='count')
 namespace_owner_group.to_csv('namespace_owner_analysis.csv', index=False)
 
-# Group by environment and image_name
-environment_image_group = df.groupby(['environment', 'image_name']).size().reset_index(name='count')
+# Group by environment and image_name, and add columns for owner, namespace, age_in_days, and image_version
+environment_image_group = df.groupby(['environment', 'image_name', 'owner', 'namespace', 'age_in_days', 'image_version']).size().reset_index(name='count')
 environment_image_group.to_csv('environment_image_analysis.csv', index=False)
 
 # Save summary DataFrame as a CSV file
