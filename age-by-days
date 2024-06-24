@@ -32,7 +32,11 @@ df = df.join(parsed_df)
 
 # Calculate the age in days for each container
 df['container_started_at'] = pd.to_datetime(df['container_started_at'], errors='coerce')
-df['age_in_days'] = (pd.to_datetime('today') - df['container_started_at']).dt.round('D').dt.days.astype(int)
+df['age_in_days'] = (pd.to_datetime('today') - df['container_started_at']).dt.days
+
+# Replace NaN values in 'age_in_days' with a placeholder, e.g., -1
+df['age_in_days'].fillna(-1, inplace=True)
+df['age_in_days'] = df['age_in_days'].astype(int)
 
 # Extract image name and version
 df['image_name'] = df['container_images'].apply(lambda x: x.strip('[]').split('/')[-1].split(':')[0])
