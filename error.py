@@ -19,3 +19,4 @@ Traceback (most recent call last):
   File "/Users/primus.vekuh@sentinelone.com/Library/Python/3.9/lib/python/site-packages/pandas/core/dtypes/astype.py", line 145, in _astype_float_to_int_nansafe
     raise IntCastingNaNError(
 pandas.errors.IntCastingNaNError: Cannot convert non-finite values (NA or inf) to integer
+primus.vekuh@sentinelone.com@C2W3596XDL reports % 
