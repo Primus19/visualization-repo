@@ -34,9 +34,8 @@ df = df.join(parsed_df)
 df['container_started_at'] = pd.to_datetime(df['container_started_at'], errors='coerce')
 df['age_in_days'] = (pd.to_datetime('today') - df['container_started_at']).dt.days
 
-# Replace NaN values in 'age_in_days' with a placeholder, e.g., -1
-df['age_in_days'].fillna(-1, inplace=True)
-df['age_in_days'] = df['age_in_days'].astype(int)
+# Replace NaN values in 'age_in_days' with a placeholder, e.g., -1, before converting to integers
+df['age_in_days'] = df['age_in_days'].fillna(-1).astype(int)
 
 # Extract image name and version
 df['image_name'] = df['container_images'].apply(lambda x: x.strip('[]').split('/')[-1].split(':')[0])
