@@ -39,8 +39,12 @@ tickets_summary.to_csv('rds_upgrades_tickets_summary.csv', index=False)
 # Report 3: Number of Instances Marked as Deleted by ENV
 deleted_summary.to_csv('rds_upgrades_deleted_summary.csv', index=False)
 
+# Use "Days to EOSL" for age calculation
+df['Age'] = df['Days to EOSL']
+
 # Report 4: Detailed report including teams owning instances, age, instance names, instance types, versions, and engine versions
 detailed_report = df[['Env', 'Instance Name', 'Owner', 'Age', 'Instance Size (GB)', 'Engine Version', 'Engine']]
+detailed_report['Upgrade Status'] = ''
 detailed_report.to_csv('rds_upgrades_detailed_report.csv', index=False)
 
 # Display DataFrames in nicely formatted tables using pandas options
