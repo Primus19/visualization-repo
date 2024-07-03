@@ -3,7 +3,6 @@ import boto3
 import pandas as pd
 import matplotlib.pyplot as plt
 import io
-import base64
 import requests
 from datetime import datetime
 
@@ -18,67 +17,73 @@ confluence_space_key = 'YOUR_SPACE_KEY'
 confluence_ancestor_id = 'PARENT_PAGE_ID'  # The ID of the parent page under which the new page will be created
 
 def lambda_handler(event, context):
-    # Read CSV file from S3
-    csv_file = 'k8s_deployments_exported_06_03_2024.csv'
-    bucket = 'your-s3-bucket-name'
-    obj = s3.get_object(Bucket=bucket, Key=csv_file)
-    df = pd.read_csv(io.BytesIO(obj['Body'].read()))
+    # Bucket and paths
+    bucket = 'cerebro-reports-confluence'
+    input_prefix = 'input/'
+    output_prefix = 'output/'
+    
+    # List all objects in the input folder
+    input_files = s3.list_objects_v2(Bucket=bucket, Prefix=input_prefix)
+    
+    # Process each file in the input folder
+    for obj in input_files.get('Contents', []):
+        file_key = obj['Key']
+        
+        if file_key.endswith('.csv'):
+            # Read CSV file from S3
+            obj = s3.get_object(Bucket=bucket, Key=file_key)
+            df = pd.read_csv(io.BytesIO(obj['Body'].read()))
 
-    # Data processing
-    df['creation_timestamp'] = pd.to_datetime(df['creation_timestamp'], errors='coerce')
-    df['creation_timestamp'] = df['creation_timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
-    df.fillna("empty", inplace=True)
-    
-    # Extract labels
-    labels_df = df['labels'].apply(json.loads).apply(pd.Series)
-    labels_df['owner'] = labels_df.get('owner', 'unknown')
-    labels_df['group'] = labels_df.get('group', 'unknown')
-    labels_df['environment'] = labels_df.get('environment', 'unknown')
-    labels_df['image_name'] = df['spec_images'].apply(lambda x: x.strip('[]').split('/')[-1].split(':')[0])
-    labels_df['image_version'] = df['spec_images'].apply(lambda x: x.strip('[]').split(':')[-1])
-    
-    # Merge extracted labels with original DataFrame
-    df = df.join(labels_df[['owner', 'group', 'environment', 'image_name', 'image_version']])
+            # Data processing
+            df['creation_timestamp'] = pd.to_datetime(df['creation_timestamp'], errors='coerce')
+            df['creation_timestamp'] = df['creation_timestamp'].dt.strftime('%Y-%m-%d %H:%M:%S')
+            df.fillna("empty", inplace=True)
+            
+            # Extract labels
+            labels_df = df['labels'].apply(json.loads).apply(pd.Series)
+            labels_df['owner'] = labels_df.get('owner', 'unknown')
+            labels_df['group'] = labels_df.get('group', 'unknown')
+            labels_df['environment'] = labels_df.get('environment', 'unknown')
+            labels_df['image_name'] = df['spec_images'].apply(lambda x: x.strip('[]').split('/')[-1].split(':')[0])
+            labels_df['image_version'] = df['spec_images'].apply(lambda x: x.strip('[]').split(':')[-1])
+            
+            # Merge extracted labels with original DataFrame
+            df = df.join(labels_df[['owner', 'group', 'environment', 'image_name', 'image_version']])
 
-    # Plotting
-    plot_and_save(df, 'namespace', 'Count of Deployments by Namespace', 'deployments_by_namespace.png', 'skyblue')
-    plot_and_save(df, 'owner', 'Count of Deployments by Owner', 'deployments_by_owner.png', 'lightgreen')
-    plot_and_save(df, 'environment', 'Count of Images by Environment', 'images_by_environment.png', 'coral')
+            # Plotting
+            plot_and_save(df, 'namespace', 'Count of Deployments by Namespace', f'{output_prefix}deployments_by_namespace.png', 'skyblue')
+            plot_and_save(df, 'owner', 'Count of Deployments by Owner', f'{output_prefix}deployments_by_owner.png', 'lightgreen')
+            plot_and_save(df, 'environment', 'Count of Images by Environment', f'{output_prefix}images_by_environment.png', 'coral')
 
-    # Analysis
-    df['creation_timestamp'] = pd.to_datetime(df['creation_timestamp'], format='%Y-%m-%d %H:%M:%S')
-    df['age_in_days'] = (pd.to_datetime('today') - df['creation_timestamp']).dt.days
-    max_age_df = df.groupby(['owner', 'namespace', 'image_name'])['age_in_days'].max().reset_index()
-    max_age_df['action'] = max_age_df['age_in_days'].apply(lambda x: 'replace' if x > 90 else 'maintain')
-    max_age_csv = max_age_df.to_csv(index=False)
-    
-    # Detailed analysis
-    detailed_analysis = df.groupby(['namespace', 'owner', 'group', 'environment', 'image_name']).size().reset_index(name='count')
-    detailed_analysis_csv = detailed_analysis.to_csv(index=False)
-    
-    # Additional grouping analysis
-    namespace_owner_group = df.groupby(['namespace', 'owner']).size().reset_index(name='count')
-    namespace_owner_group_csv = namespace_owner_group.to_csv(index=False)
-    environment_image_group = df.groupby(['environment', 'image_name', 'owner', 'namespace', 'age_in_days', 'image_version']).size().reset_index(name='count')
-    environment_image_group_csv = environment_image_group.to_csv(index=False)
-    
-    # Save all files to S3
-    s3_bucket = 'cerebro-reports-confluence'
-    s3.put_object(Bucket=s3_bucket, Key='max_age_analysis.csv', Body=max_age_csv)
-    s3.put_object(Bucket=s3_bucket, Key='detailed_analysis.csv', Body=detailed_analysis_csv)
-    s3.put_object(Bucket=s3_bucket, Key='namespace_owner_analysis.csv', Body=namespace_owner_group_csv)
-    s3.put_object(Bucket=s3_bucket, Key='environment_image_analysis.csv', Body=environment_image_group_csv)
-    s3.put_object(Bucket=s3_bucket, Key='summary_k8s_deployments.csv', Body=df.to_csv(index=False))
+            # Analysis
+            df['creation_timestamp'] = pd.to_datetime(df['creation_timestamp'], format='%Y-%m-%d %H:%M:%S')
+            df['age_in_days'] = (pd.to_datetime('today') - df['creation_timestamp']).dt.days
+            max_age_df = df.groupby(['owner', 'namespace', 'image_name'])['age_in_days'].max().reset_index()
+            max_age_df['action'] = max_age_df['age_in_days'].apply(lambda x: 'replace' if x > 90 else 'maintain')
+            save_csv_to_s3(max_age_df, f'{output_prefix}max_age_analysis.csv')
+            
+            # Detailed analysis
+            detailed_analysis = df.groupby(['namespace', 'owner', 'group', 'environment', 'image_name']).size().reset_index(name='count')
+            save_csv_to_s3(detailed_analysis, f'{output_prefix}detailed_analysis.csv')
+            
+            # Additional grouping analysis
+            namespace_owner_group = df.groupby(['namespace', 'owner']).size().reset_index(name='count')
+            save_csv_to_s3(namespace_owner_group, f'{output_prefix}namespace_owner_analysis.csv')
+            environment_image_group = df.groupby(['environment', 'image_name', 'owner', 'namespace', 'age_in_days', 'image_version']).size().reset_index(name='count')
+            save_csv_to_s3(environment_image_group, f'{output_prefix}environment_image_analysis.csv')
+            
+            # Save summary DataFrame as a CSV file
+            save_csv_to_s3(df, f'{output_prefix}summary_k8s_deployments.csv')
 
-    # Push the report to Confluence
-    push_to_confluence(df.to_string(index=False), 'K8s Deployments Summary')
+            # Push the report to Confluence
+            push_to_confluence(df.to_string(index=False), 'K8s Deployments Summary')
 
     return {
         'statusCode': 200,
-        'body': json.dumps('Report generated, pushed to Confluence, and saved to S3')
+        'body': json.dumps('Reports generated, pushed to Confluence, and saved to S3')
     }
 
-def plot_and_save(df, column, title, filename, color):
+def plot_and_save(df, column, title, s3_key, color):
     plt.figure(figsize=(10, 6))
     df[column].value_counts().plot(kind='bar', color=color)
     plt.title(title)
@@ -86,14 +91,19 @@ def plot_and_save(df, column, title, filename, color):
     plt.ylabel('Count')
     plt.xticks(rotation=45)
     plt.tight_layout()
-    plt.savefig(f'/tmp/{filename}', bbox_inches='tight')
+    plt.savefig('/tmp/plot.png', bbox_inches='tight')
     plt.close()
-    save_plot_to_s3(f'/tmp/{filename}', filename)
+    save_plot_to_s3('/tmp/plot.png', s3_key)
 
-def save_plot_to_s3(local_path, s3_filename):
-    s3_bucket = 'cerebro-reports-confluence'
+def save_plot_to_s3(local_path, s3_key):
+    bucket = 'cerebro-reports-confluence'
     with open(local_path, 'rb') as f:
-        s3.put_object(Bucket=s3_bucket, Key=s3_filename, Body=f)
+        s3.put_object(Bucket=bucket, Key=s3_key, Body=f)
+
+def save_csv_to_s3(df, s3_key):
+    csv_buffer = io.StringIO()
+    df.to_csv(csv_buffer, index=False)
+    s3.put_object(Bucket='cerebro-reports-confluence', Key=s3_key, Body=csv_buffer.getvalue())
 
 def push_to_confluence(content, title):
     url = f"{confluence_base_url}/content/"
