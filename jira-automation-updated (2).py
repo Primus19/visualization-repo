@@ -1788,7 +1788,7 @@ STORY_PROJECT_KEYS = [
             # Create the new issue and set the custom field value, summary
             cloned_issue = jira.create_issue(
                 summary=f"{component} - Base Image Update Required - FedRAMP Deployment Ticket Request",
-                description="The base image for this component is out-of-date. To mitigate vulnerabilities and remain within FedRAMP policy compliance, these base images should be updated at least once per month. Please provide FedRAMP with a new build of the component on the latest base image and submit a FedRAMP deployment ticket with the details for that new version. The template to be used for that deployment ticket is located here:\n\nFEDRAMP-2764: [TEMPLATE][FedRAMP Deployment] <deployable unit> - <version>\n\nPlease reach out to Tim Levesque, Barry Berard, or Joel Stewart if you have any questions.",
+                description="The base image for this component is out-of-date. To mitigate vulnerabilities and remain within FedRAMP policy compliance, these base images should be updated at least once per month. Please provide FedRAMP with a new build of the component on the latest base image and submit a FedRAMP deployment ticket with the details for that new version. The template to be used for that deployment ticket is located here:\n\nFEDRAMP-9320: [TEMPLATE][FedRAMP Deployment] <deployable unit> - <version>\n\nPlease reach out to Tim Levesque, Primus Vekuh if you have any questions.",
                 project=project_key,
                 issuetype={'name': 'Story'},
                 customfield_11067=team_field,
