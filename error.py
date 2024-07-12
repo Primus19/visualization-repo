@@ -1,6 +1,4 @@
-Env	Instance Name	Engine	Engine Version	Status	Owner	Validated Exists As Of	Ticket	Major	Minor	Engine EOL	Days to EOSL	Creation Date	Age	Allocated Storage (GB)	Instance Size (GB)
+Jira API call failed. Error: JiraError HTTP 400 url: https://sentinelone.atlassian.net/rest/api/2/issue
 
-FedRAMP-RDS-Upgrades - Uber Sheet.csv
-
-
-https://towardsdatascience.com/easily-download-any-python-package-for-aws-lambda-layers-b8ffd43a26ee
+        response headers = {'Date': 'Fri, 12 Jul 2024 15:15:31 GMT', 'Content-Type': 'application/json;charset=UTF-8', 'Server': 'AtlassianEdge', 'Timing-Allow-Origin': '*', 'X-Arequestid': '52af3eb4f8d0db5eeabe1915dc152ff4', 'X-Aaccountid': '712020%3A40056c83-ede4-4329-8c18-f697dacc0f5b', 'Cache-Control': 'no-cache, no-store, no-transform', 'X-Content-Type-Options': 'nosniff', 'X-Xss-Protection': '1; mode=block', 'Atl-Traceid': '7772ae2c724a4182b31b73da6495aefc', 'Strict-Transport-Security': 'max-age=63072000; includeSubDomains; preload', 'Report-To': '{"endpoints": [{"url": "https://dz8aopenkvv6s.cloudfront.net"}], "group": "endpoint-1", "include_subdomains": true, "max_age": 600}', 'Nel': '{"failure_fraction": 0.001, "include_subdomains": true, "max_age": 600, "report_to": "endpoint-1"}', 'Transfer-Encoding': 'chunked'}
+        response text = {"errorMessages":[],"errors":{"customfield_11406":"Is Capitalized is required.","customfield_11067":"Team is required."}}
