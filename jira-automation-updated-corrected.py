@@ -75,6 +75,7 @@ def create_epic_and_clone_stories():
                 project=project_key,
                 issuetype={'name': 'Story'},
                 customfield_11067=team_field,
+                customfield_11406=True,  # Assuming 'Is Capitalized' is a boolean field
                 labels=labels
             )
 
