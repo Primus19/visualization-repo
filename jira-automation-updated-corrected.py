@@ -3,7 +3,7 @@ from jira import JIRA
 from jira.exceptions import JIRAError
 
 # Static project and issue keys
-EPIC_PROJECT_KEY = "10267"
+EPIC_PROJECT_KEY = "FEDRAMP"
 STORY_PROJECT_KEYS = [
     {
         "project": "FEDRAMP-10090",
@@ -39,10 +39,10 @@ def create_epic_and_clone_stories():
     try:
         # Initialize Jira connection
         jira_token = {
-            "username": "your_username",
-            "credential": "your_api_token"
+            "username": "primus.vterst",
+            "credential": "test"
         }
-        jira = JIRA(basic_auth=(jira_token['username'], jira_token['credential']), options={'server': 'https://your_jira_server.atlassian.net/'})
+        jira = JIRA(basic_auth=(jira_token['username'], jira_token['credential']), options={'server': 'https://sentinelone.atlassian.net/'})
 
         # Prompt user for PI variable
         pi_variable = input("Enter the value for PI: ")
