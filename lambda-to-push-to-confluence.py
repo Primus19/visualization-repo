@@ -11,8 +11,8 @@ s3 = boto3.client('s3')
 
 # Confluence API details
 confluence_base_url = 'https://sentinelone.atlassian.net/wiki/rest/api/content'
-confluence_username = 'primus.vekuh@sentinelone.com'
-confluence_api_token = 'token'
+confluence_username = 'primus.veemaelone.com'
+confluence_api_token = 'toenD'
 confluence_page_id = '3733356828'  # Specific page ID to update
 
 def lambda_handler(event, context):
@@ -185,63 +185,4 @@ def save_csv_to_s3(df, s3_key):
     s3.put_object(Bucket='gov-configuration-data', Key=s3_key, Body=csv_buffer.getvalue())
     print(f"Saved CSV to S3: {s3_key}")
 
-def push_to_confluence(content, current_version):
-    url = f"{confluence_base_url}/{confluence_page_id}"
-    headers = {
-        'Authorization': f'Basic {base64.b64encode(f"{confluence_username}:{confluence_api_token}".encode()).decode()}',
-        'Content-Type': 'application/json'
-    }
-    data = {
-        'version': {'number': current_version + 1},
-        'title': 'Kubernetes Deployments Report',
-        'type': 'page',
-        'body': {
-            'storage': {
-                'value': content,
-                'representation': 'storage'
-            }
-        }
-    }
-    response = requests.put(url, headers=headers, data=json.dumps(data))
-    if response.status_code != 200:
-        raise Exception(f"Failed to update Confluence page: {response.status_code} - {response.text}")
-    print("Confluence page updated successfully")
-
-def get_current_page_content(page_id):
-    url = f"{confluence_base_url}/{page_id}?expand=version"
-    headers = {
-        'Authorization': f'Basic {base64.b64encode(f"{confluence_username}:{confluence_api_token}".encode()).decode()}'
-    }
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        raise Exception(f"Failed to get Confluence page content: {response.status_code} - {response.text}")
-    page_data = response.json()
-    return page_data['body']['storage']['value'], page_data['version']['number']
-
-def clean_and_insert_content(current_content, new_content):
-    old_content_tag = '<h3 style="color:#2c3e50;">Kubernetes Deployments Analysis</h3>'
-    new_content_tag = '<h3 style="color:#2c3e50;">Summary of Kubernetes Deployments</h3>'
-
-    start_index = current_content.find(old_content_tag)
-    if start_index != -1:
-        end_index = current_content.find(new_content_tag, start_index)
-        if end_index != -1:
-            end_index += len(new_content_tag)
-            current_content = current_content[:start_index] + current_content[end_index:]
-    
-    updated_content = current_content + new_content
-    return updated_content
-
-def format_kubernetes_deployments_report(df):
-    from io import StringIO
-
-    report = StringIO()
-    df.to_html(buf=report, index=False)
-    return report.getvalue()
-
-def format_summary_report(df):
-    from io import StringIO
-
-    report = StringIO()
-    df.to_html(buf=report, index=False)
-    return report.getvalue()
+def push_to_confluence(content, current_version &#8203;:citation[oaicite:0]{index=0}&#8203;
