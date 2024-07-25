@@ -12,7 +12,7 @@ s3 = boto3.client('s3')
 # Confluence API details
 confluence_base_url = 'https://sentinelone.atlassian.net/wiki/rest/api/content'
 confluence_username = 'primus.vekuh@sentinelone.com'
-confluence_api_token = 'ATATT3xFfGF0CCriLdOSzTHpFh2CMVV9pEnF9xFGKzr_xdB4HRNzRLvFHXGAX2U8tHok9-Mahw1dPHXRL13DXTHEuK71J2PR3RLUzfh4WbfxqbbPHEf-Y7jmnMHavxUvkhjgLekNUFfuBEs-a-H0cDr8Y58BfY5dtvTnCCCi6M1k29PNnQD5e9Y=65E7A2AD'
+confluence_api_token = 'token'
 confluence_page_id = '3733356828'  # Specific page ID to update
 
 def lambda_handler(event, context):
